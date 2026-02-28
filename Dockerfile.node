@@ -1,0 +1,21 @@
+# Node image: runs one pipeline part (model slice). Run with --gpus all for GPU.
+FROM pytorch/pytorch:2.5.0-cuda12.1-cudnn8-runtime
+
+WORKDIR /app
+
+# Install uv for fast, cached installs
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# transformers only (torch already in base image); use cache for fast rebuilds
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system --no-cache 'transformers>=4.36'
+
+# Application (node needs common + split_two_machines + node)
+COPY common.py node.py split_two_machines.py ./
+
+ENV CONTROLLER_ADDRESS=controller:9000
+ENV NODE_INDEX=0
+ENV NODE_PARTS=2
+ENV NODE_MODEL=Qwen/Qwen3-0.6B
+
+CMD ["sh", "-c", "exec python -u node.py --control-socket \"$CONTROLLER_ADDRESS\" --index \"$NODE_INDEX\" --parts \"$NODE_PARTS\" --model \"$NODE_MODEL\""]

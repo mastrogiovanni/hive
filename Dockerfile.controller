@@ -1,0 +1,11 @@
+# Minimal controller image: no torch/transformers, TCP listener for nodes and clients.
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Only need stdlib; copy protocol and controller code.
+COPY common.py control.py ./
+
+EXPOSE 9000
+
+CMD ["python", "-u", "control.py", "--bind", "0.0.0.0:9000"]
