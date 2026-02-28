@@ -10,7 +10,7 @@ import sys
 
 import torch
 
-from common import connect_socket, recv_tensor, send_end, send_tensor, send_json
+from src.common import connect_socket, recv_tensor, send_end, send_tensor, send_json
 from transformers import AutoTokenizer
 
 

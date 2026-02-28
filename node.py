@@ -25,16 +25,16 @@ def run_controller_mode(conn: socket.socket, part, index: int, parts: int, devic
             data = recv_tensor(conn)
             if data is None:
                 break
-            print(f"[node{index}] data in shape={tuple(data.shape)}")
+            print(f"[node{index}] data in shape={tuple(data.shape)}", flush=True)
             data = data.to(device)
             out = part(data)
             if index == parts - 1:
                 next_token = out[:, -1, :].argmax(dim=-1, keepdim=True)
                 send_tensor(conn, next_token)
-                print(f"[node{index}] data out (next_token)")
+                print(f"[node{index}] data out (next_token)", flush=True)
             else:
                 send_tensor(conn, out)
-                print(f"[node{index}] data out shape={tuple(out.shape)}")
+                print(f"[node{index}] data out shape={tuple(out.shape)}", flush=True)
     conn.close()
 
 
@@ -49,13 +49,13 @@ def run_peer_mode(part, index: int, parts: int, device: str, prev_socket_path: s
         server_prev = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         server_prev.bind(prev_socket_path)
         server_prev.listen(1)
-        print(f"[node{index}] Listening on prev_socket={prev_socket_path}")
+        print(f"[node{index}] Listening on prev_socket={prev_socket_path}", flush=True)
         conn_prev, _ = server_prev.accept()
-        print(f"[node{index}] Client connected (prev)")
+        print(f"[node{index}] Client connected (prev)", flush=True)
     else:
         conn_prev = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         conn_prev.connect(prev_socket_path)
-        print(f"[node{index}] Connected to previous node at {prev_socket_path}")
+        print(f"[node{index}] Connected to previous node at {prev_socket_path}", flush=True)
 
     if is_last:
         if os.path.exists(next_socket_path):
@@ -63,13 +63,13 @@ def run_peer_mode(part, index: int, parts: int, device: str, prev_socket_path: s
         server_next = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         server_next.bind(next_socket_path)
         server_next.listen(1)
-        print(f"[node{index}] Listening on next_socket={next_socket_path} (client will receive)")
+        print(f"[node{index}] Listening on next_socket={next_socket_path} (client will receive)", flush=True)
         conn_next, _ = server_next.accept()
-        print(f"[node{index}] Client connected (next)")
+        print(f"[node{index}] Client connected (next)", flush=True)
     else:
         conn_next = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         conn_next.connect(next_socket_path)
-        print(f"[node{index}] Connected to next node at {next_socket_path}")
+        print(f"[node{index}] Connected to next node at {next_socket_path}", flush=True)
 
     with torch.no_grad():
         while True:
@@ -111,19 +111,19 @@ def main():
     next_socket_path = args.next_socket
 
     if index < 0 or index >= parts:
-        print(f"[node{index}] Invalid index {index} for parts={parts}", file=sys.stderr)
+        print(f"[node{index}] Invalid index {index} for parts={parts}", file=sys.stderr, flush=True)
         sys.exit(1)
 
     if control_socket_path and (not prev_socket_path or not next_socket_path):
         pass  # controller mode: prev/next not needed
     elif not control_socket_path and (not prev_socket_path or not next_socket_path):
-        print("[node] Either --control-socket or both --prev-socket and --next-socket are required", file=sys.stderr)
+        print("[node] Either --control-socket or both --prev-socket and --next-socket are required", file=sys.stderr, flush=True)
         sys.exit(1)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     dtype = torch.float16 if device == "cuda" else torch.float32
 
-    print(f"[node{index}] Loading model and building part {index}/{parts}...")
+    print(f"[node{index}] Loading model and building part {index}/{parts}...", flush=True)
     full_model = AutoModelForCausalLM.from_pretrained(
         args.model,
         dtype=dtype,
@@ -137,12 +137,12 @@ def main():
     if control_socket_path:
         conn = connect_socket(control_socket_path)
         send_json(conn, {"type": "node", "model": args.model, "parts": parts, "index": index})
-        print(f"[node{index}] Registered with controller at {control_socket_path}")
+        print(f"[node{index}] Registered with controller at {control_socket_path}", flush=True)
         run_controller_mode(conn, part, index, parts, device)
     else:
         run_peer_mode(part, index, parts, device, prev_socket_path, next_socket_path)
 
-    print(f"[node{index}] Done.")
+    print(f"[node{index}] Done.", flush=True)
     sys.exit(0)
 
 

@@ -16,5 +16,6 @@ COPY src/ /app/src/
 COPY node.py /app/node.py
 
 ENV PYTHONPATH=/app/src
+ENV PYTHONUNBUFFERED=1
 
-ENTRYPOINT ["uv", "run", "node.py"]
+ENTRYPOINT ["/usr/local/bin/uv"]

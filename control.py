@@ -58,8 +58,12 @@ def main():
     )
     args = parser.parse_args()
 
-    server = listen_socket(args.bind)
-    print(f"[control] Listening on {args.bind}")
+    try:
+        server = listen_socket(args.bind)
+    except OSError as e:
+        print(f"[control] Failed to bind to {args.bind}: {e}", file=sys.stderr)
+        sys.exit(1)
+    print(f"[control] Listening on {args.bind}", flush=True)
 
     # (model, parts) -> { index: conn }
     pipelines: dict[tuple[str, int], dict[int, socket.socket]] = {}

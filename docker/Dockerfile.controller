@@ -13,7 +13,8 @@ COPY src/ /app/src/
 COPY control.py /app/control.py
 
 ENV PYTHONPATH=/app/src
+ENV PYTHONUNBUFFERED=1
 
 EXPOSE 9000
 
-CMD ["uv", "run", "control.py"]
+ENTRYPOINT ["/usr/local/bin/uv"]
