@@ -11,11 +11,10 @@ Generation is a loop: for each new token, run Method 1 on the current sequence, 
 
 ## Run
 
-```bash
-pip install -r requirements.txt
-python main.py              # single machine
-python split_two_machines.py   # two-method (two-machine) emulation
-```
+Install dependencies and run commands with **uv**; see **[RUN.md](RUN.md)** for:
+
+- `uv sync` to install dependencies
+- `PYTHONPATH=src uv run ...` for controller, nodes, and client
 
 Model: `Qwen/Qwen3-0.6B` (override via `model_id` in the scripts). CUDA used if available.
 

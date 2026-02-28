@@ -6,14 +6,16 @@ WORKDIR /app
 # Install uv for fast, cached installs
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# transformers only (torch already in base image); use cache for fast rebuilds
+# Dependencies from project (transformers, etc.)
+COPY pyproject.toml uv.lock /app/
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system --no-cache 'transformers>=4.36' accelerate
+    uv sync --frozen --no-install-project
 
-# Application (node needs common + split_two_machines + node)
-COPY common.py /app/common.py
+# Application (node needs common + split_two_machines from src/)
+COPY src/ /app/src/
 COPY node.py /app/node.py
-COPY split_two_machines.py /app/split_two_machines.py
+
+ENV PYTHONPATH=/app/src
 
 # ENV CONTROLLER_ADDRESS=controller:9000
 # ENV NODE_INDEX=0
