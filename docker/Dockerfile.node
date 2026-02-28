@@ -11,16 +11,10 @@ COPY pyproject.toml uv.lock /app/
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
 
-# Application (node needs common + split_two_machines from src/)
+# App: src (common, split_two_machines) + node entrypoint (build context = project root)
 COPY src/ /app/src/
 COPY node.py /app/node.py
 
 ENV PYTHONPATH=/app/src
 
-# ENV CONTROLLER_ADDRESS=controller:9000
-# ENV NODE_INDEX=0
-# ENV NODE_PARTS=2
-# ENV NODE_MODEL=Qwen/Qwen3-0.6B
-
-ENTRYPOINT ["uv", "run", "/app/node.py"] 
-#, "--control-socket", "$CONTROLLER_ADDRESS", "--index" "$NODE_INDEX", "--parts", "$NODE_PARTS", "--model", "$NODE_MODEL"]
+ENTRYPOINT ["uv", "run", "node.py"]

@@ -69,6 +69,7 @@ def main():
         conn, _ = server.accept()
         try:
             msg = recv_json(conn)
+            print(f"[control] Received message: {msg}")
         except (json.JSONDecodeError, OSError):
             conn.close()
             continue
@@ -100,6 +101,7 @@ def main():
                     conn.close()
                     continue
                 nodes = pipelines[key]
+            print(f"[control] Client connected model={model!r} parts={parts}")
             t = threading.Thread(target=client_handler, args=(conn, key, pipelines))
             t.daemon = True
             t.start()

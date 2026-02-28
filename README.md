@@ -143,10 +143,10 @@ Two images: **controller** (minimal, no GPU) and **node** (model + GPU support).
 cd /path/to/distro
 
 # Controller (small, no torch)
-docker build -f Dockerfile.controller -t distro-controller .
+docker build -f docker/Dockerfile.controller -t distro-controller .
 
 # Node (PyTorch + CUDA; use for GPU)
-docker build -f Dockerfile.node -t distro-node .
+docker build -f docker/Dockerfile.node -t distro-node .
 ```
 
 Build with Docker BuildKit for cache (e.g. `DOCKER_BUILDKIT=1 docker build ...`).

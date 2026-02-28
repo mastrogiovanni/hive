@@ -37,8 +37,8 @@ uv run control.py --bind 0.0.0.0:9000
 **Nodes** (one terminal per pipeline part, e.g. 3 parts):
 
 ```bash
-uv run node.py --index 0 --parts 3 --control-socket 127.0.0.1:9000 --model "Qwen/Qwen3-0.6B"
-uv run node.py --index 1 --parts 3 --control-socket 127.0.0.1:9000 --model "Qwen/Qwen3-0.6B"
+PYTHONPATH=src uv run node.py --index 0 --parts 3 --control-socket 127.0.0.1:9000 --model "Qwen/Qwen3-0.6B"
+PYTHONPATH=src uv run node.py --index 1 --parts 3 --control-socket 127.0.0.1:9000 --model "Qwen/Qwen3-0.6B"
 uv run node.py --index 2 --parts 3 --control-socket 127.0.0.1:9000 --model "Qwen/Qwen3-0.6B"
 ```
 

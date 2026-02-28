@@ -13,8 +13,8 @@ import sys
 
 import torch
 
-from common import connect_socket, recv_json, recv_tensor, send_end, send_json, send_tensor
-from split_two_machines import get_model_part
+from src.common import connect_socket, recv_json, recv_tensor, send_end, send_json, send_tensor
+from src.split_two_machines import get_model_part
 from transformers import AutoModelForCausalLM
 
 
@@ -25,13 +25,16 @@ def run_controller_mode(conn: socket.socket, part, index: int, parts: int, devic
             data = recv_tensor(conn)
             if data is None:
                 break
+            print(f"[node{index}] data in shape={tuple(data.shape)}")
             data = data.to(device)
             out = part(data)
             if index == parts - 1:
                 next_token = out[:, -1, :].argmax(dim=-1, keepdim=True)
                 send_tensor(conn, next_token)
+                print(f"[node{index}] data out (next_token)")
             else:
                 send_tensor(conn, out)
+                print(f"[node{index}] data out shape={tuple(out.shape)}")
     conn.close()
 
 
