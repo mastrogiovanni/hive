@@ -10,7 +10,7 @@ import sys
 
 import torch
 
-from common import recv_json, recv_tensor, send_end, send_tensor, send_json
+from common import connect_socket, recv_tensor, send_end, send_tensor, send_json
 from transformers import AutoTokenizer
 
 
@@ -36,15 +36,12 @@ def main():
     input_ids = inputs.input_ids
 
     if use_control:
-        conn = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        conn.connect(args.control_socket.strip())
+        conn = connect_socket(args.control_socket.strip())
         send_json(conn, {"type": "client", "model": args.model, "parts": args.parts})
         print("[client] Connected to controller")
     else:
-        sock_first = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock_first.connect(args.first_socket)
-        sock_last = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock_last.connect(args.last_socket)
+        sock_first = connect_socket(args.first_socket)
+        sock_last = connect_socket(args.last_socket)
 
     eos_token_id = tokenizer.eos_token_id
 

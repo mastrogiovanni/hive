@@ -13,7 +13,7 @@ import sys
 
 import torch
 
-from common import recv_json, recv_tensor, send_end, send_json, send_tensor
+from common import connect_socket, recv_json, recv_tensor, send_end, send_json, send_tensor
 from split_two_machines import get_model_part
 from transformers import AutoModelForCausalLM
 
@@ -123,7 +123,7 @@ def main():
     print(f"[node{index}] Loading model and building part {index}/{parts}...")
     full_model = AutoModelForCausalLM.from_pretrained(
         args.model,
-        torch_dtype=dtype,
+        dtype=dtype,
         device_map=device,
     )
     part = get_model_part(full_model, parts, index).to(device).to(dtype).eval()
@@ -132,8 +132,7 @@ def main():
         torch.cuda.empty_cache()
 
     if control_socket_path:
-        conn = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        conn.connect(control_socket_path)
+        conn = connect_socket(control_socket_path)
         send_json(conn, {"type": "node", "model": args.model, "parts": parts, "index": index})
         print(f"[node{index}] Registered with controller at {control_socket_path}")
         run_controller_mode(conn, part, index, parts, device)

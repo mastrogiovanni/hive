@@ -1,11 +1,16 @@
-# Minimal controller image: no torch/transformers, TCP listener for nodes and clients.
+# Controller image: TCP listener for nodes and clients.
 FROM python:3.12-slim
 
 WORKDIR /app
 
-# Only need stdlib; copy protocol and controller code.
-COPY common.py control.py ./
+# Install uv and torch (CPU)
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system --no-cache 'torch>=2.0' numpy
+
+COPY common.py /app/common.py
+COPY control.py /app/control.py
 
 EXPOSE 9000
 
-CMD ["python", "-u", "control.py", "--bind", "0.0.0.0:9000"]
+CMD ["uv", "run", "/app/control.py"]
